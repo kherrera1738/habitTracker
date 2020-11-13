@@ -1,0 +1,25 @@
+$primary-color: #99dac4;
+$secondary-color: beige;
+$third-color: #f8f8f8;
+
+.logo-div {
+    background-color: $primary-color;
+    // font-family: 'Farro';
+}
+
+.main-nav {
+    background-color: $secondary-color;
+}
+
+.active {
+    color: black;
+}
+
+.nav-link:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+body {
+    background-color: $third-color;
+}
