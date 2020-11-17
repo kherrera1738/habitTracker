@@ -1,5 +1,5 @@
 from django.test import TestCase, tag
-from .models import ActivityEntry, ActivityLog, DataSet, Habit, QuantitativeData, SubHabit, User, MainHabit, ViewRequest
+from .models import ActivityEntry, ActivityLog, DataSet, Habit, QuantitativeData, QualitativeData, QualitativeDataSet, QuantitativeDataSet,SubHabit, User, MainHabit, ViewRequest
 from .util import SubHabitError
 from datetime import datetime
 
@@ -204,7 +204,7 @@ class ActivityLogTestCase(TestCase):
         # Make sure oldest entry is still in database
         self.assertTrue(ActivityEntry.objects.filter(id=e2_id).exists())
 
-@tag('DataSet', 'DataSetBasics')
+@tag('DataSet', 'DataSetBasics', 'rev1')
 class DataSetTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(username="U1", email="U1@exmaple.com", password="u1password")
@@ -213,8 +213,8 @@ class DataSetTestCase(TestCase):
 
     def test_add_correct_data(self):
         """ Try to add correct data to corresponding dataset type """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         de1 = d1.addData(1)
         de2 = d2.addData("A")
@@ -224,16 +224,16 @@ class DataSetTestCase(TestCase):
 
     def test_add_wrong_data(self):
         """ Try to add missmatched data to the wrong type of dataset """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         self.assertFalse(d1.addData("A"))
         self.assertFalse(d2.addData(1))
 
     def test_update_data(self):
         """ Attempt to change data from entry """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         de1 = d1.addData(1)
         de2 = d2.addData("A")
@@ -249,8 +249,8 @@ class DataSetTestCase(TestCase):
 
     def test_update_wrong_data(self):
         """ Attempt to update with wrong data type """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         de1 = d1.addData(1)
         de2 = d2.addData("A")
@@ -260,8 +260,8 @@ class DataSetTestCase(TestCase):
 
     def test_remove_entry(self):
         """ Attempt to remove an entry from database and set """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         de1_id = d1.addData(1).id
         de2_id = d2.addData("A").id
@@ -274,8 +274,8 @@ class DataSetTestCase(TestCase):
 
     def test_remove_nonexistant_entry(self):
         """ Attempt to remove an entry that is not in dataset """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         self.assertFalse(d1.removeData(1))
         self.assertFalse(d2.removeData(1))

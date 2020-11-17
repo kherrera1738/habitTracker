@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from numbers import Number
 
 # Create your models here.
 class User(AbstractUser):
@@ -128,33 +129,42 @@ class DataSet(models.Model):
     def __str__(self):
         return f"{self.id} | {self.associatedHabit} | {self.type}"
 
-    def addData(self, data):
-        if self.type == 0 and isinstance(data, int):
-            return QuantitativeData.objects.create(parentSet=self, content=data)
-        elif self.type == 1 and isinstance(data, str):
-            return QualitiativeData.objects.create(parentSet=self, content=data)
-        else:
-            return False
+class QualitativeDataSet(DataSet):
     
+    def addData(self, data):
+        if isinstance(data, str):
+            return QualitativeData.objects.create(parentSet=self, content=data)
+        return False
+
     def updateEntry(self, entryId, data):
-        if self.type == 0 and isinstance(data, int):
-            toUpdate = QuantitativeData.objects.filter(id=entryId)
-        elif self.type == 1 and isinstance(data, str):
-            toUpdate = QualitiativeData.objects.filter(id=entryId)
-        else:
-            return False
-
-        return toUpdate.update(content=data)
-
+        if isinstance(data, str):
+           return QualitativeData.objects.filter(id=entryId).update(content=data)
+        return 
+    
     def removeData(self, entryId):
-        if self.type == 0 and QuantitativeData.objects.filter(id=entryId).exists():
+        if QualitativeData.objects.filter(id=entryId).exists():
+            QualitativeData.objects.get(id=entryId).delete()
+            return True
+        return False
+
+class QuantitativeDataSet(DataSet):
+    
+    def addData(self, data):
+        if isinstance(data, Number):
+            return QuantitativeData.objects.create(parentSet=self, content=data)
+        return False
+
+    def updateEntry(self, entryId, data):
+        if isinstance(data, Number):
+           return QuantitativeData.objects.filter(id=entryId).update(content=data)
+        return 
+    
+    def removeData(self, entryId):
+        if QuantitativeData.objects.filter(id=entryId).exists():
             QuantitativeData.objects.get(id=entryId).delete()
             return True
-        elif self.type == 1 and QualitiativeData.objects.filter(id=entryId).exists():
-            QualitiativeData.objects.get(id=entryId).delete()
-            return True
-        else:
-            return False
+        return False
+
 
 class DataEntry(models.Model):
     parentSet = models.ForeignKey(DataSet, on_delete=models.CASCADE, related_name="dataEntries")
@@ -166,5 +176,5 @@ class DataEntry(models.Model):
 class QuantitativeData(DataEntry):
     content = models.DecimalField(max_digits=20, decimal_places=2)
 
-class QualitiativeData(DataEntry):
+class QualitativeData(DataEntry):
     content = models.TextField()
