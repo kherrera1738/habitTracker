@@ -216,8 +216,8 @@ class DataSetTestCase(TestCase):
         d1 = DataSet.objects.get(type=0)
         d2 = DataSet.objects.get(type=1)
 
-        de1 = d1.add(1)
-        de2 = d2.add("A")
+        de1 = d1.addData(1)
+        de2 = d2.addData("A")
 
         self.assertEqual(de1.content, 1)
         self.assertEqual(de2.content, "A")
@@ -235,11 +235,14 @@ class DataSetTestCase(TestCase):
         d1 = DataSet.objects.get(type=0)
         d2 = DataSet.objects.get(type=1)
 
-        de1 = d1.add(1)
-        de2 = d2.add("A")
+        de1 = d1.addData(1)
+        de2 = d2.addData("A")
 
         d1.updateEntry(de1.id, 2)
         d2.updateEntry(de2.id, "B")
+
+        de1.refresh_from_db()
+        de2.refresh_from_db()
 
         self.assertEqual(de1.content, 2)
         self.assertEqual(de2.content, "B")
@@ -249,8 +252,8 @@ class DataSetTestCase(TestCase):
         d1 = DataSet.objects.get(type=0)
         d2 = DataSet.objects.get(type=1)
 
-        de1 = d1.add(1)
-        de2 = d2.add("A")
+        de1 = d1.addData(1)
+        de2 = d2.addData("A")
 
         self.assertFalse(d1.updateEntry(de1.id, "B"))
         self.assertFalse(d2.updateEntry(de2.id, 2))
@@ -260,22 +263,22 @@ class DataSetTestCase(TestCase):
         d1 = DataSet.objects.get(type=0)
         d2 = DataSet.objects.get(type=1)
 
-        de1_id = d1.add(1).id
-        de2_id = d2.add("A").id
+        de1_id = d1.addData(1).id
+        de2_id = d2.addData("A").id
 
-        self.assertTrue(d1.remove(de1_id))
-        self.assertTrue(d2.remove(de2_id))
+        self.assertTrue(d1.removeData(de1_id))
+        self.assertTrue(d2.removeData(de2_id))
 
         self.assertEqual(d1.dataEntries.all().count(), 0)
         self.assertEqual(d2.dataEntries.all().count(), 0)
 
-    def text_remove_nonexistant_entry(self):
+    def test_remove_nonexistant_entry(self):
         """ Attempt to remove an entry that is not in dataset """
         d1 = DataSet.objects.get(type=0)
         d2 = DataSet.objects.get(type=1)
 
-        self.assertFalse(d1.remove(1))
-        self.assertfFalse(d2.remove(1))
+        self.assertFalse(d1.removeData(1))
+        self.assertFalse(d2.removeData(1))
 
 @tag('DataSet', 'DataSetQuery')
 class DataSetQueryCase(TestCase):
@@ -489,7 +492,7 @@ class ViewRequestTestCase(TestCase):
         # Make sure that the view list is updated
         self.assertTrue(mh1.viewers.filter(user=u2).exists())
 
-@tag('Habit')
+@tag('Habit', 'rev1')
 class HabitTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(username="U1", email="U1@exmaple.com", password="u1password")
@@ -507,7 +510,7 @@ class HabitTestCase(TestCase):
         u1 = User.objects.get(username="U1")
         u2 = User.objects.get(username="U2")
         mh1 = MainHabit.objects.get(name="AAA")
-        r1 = mh1.sendRequest(u2)
+        r1 = mh1.sendRequest(u2.id)
         self.assertEqual(r1.associatedHabit, mh1)
         self.assertEqual(r1.recievingUser, u2)
         self.assertEqual(r1.sendingUser, u1)
@@ -516,7 +519,7 @@ class HabitTestCase(TestCase):
         """ Check if request is deleted if rejected """
         u2 = User.objects.get(username="U2")
         mh1 = MainHabit.objects.get(name="AAA")
-        r1 = mh1.sendRequest(u2)
+        r1 = mh1.sendRequest(u2.id)
         r1_id = r1.id
         r1.reject()
         self.assertFalse(ViewRequest.objects.filter(id=r1_id).exists())
@@ -525,7 +528,7 @@ class HabitTestCase(TestCase):
         """ Check if user has been added to view list """
         u2 = User.objects.get(username="U2")
         mh1 = MainHabit.objects.get(name="AAA")
-        r1 = mh1.sendRequest(u2)
+        r1 = mh1.sendRequest(u2.id)
         r1_id = r1.id
         r1.accept()
         self.assertFalse(ViewRequest.objects.filter(id=r1_id).exists())
@@ -548,7 +551,7 @@ class HabitTestCase(TestCase):
         """ Check that you cannot send request to owner """
         u1 = User.objects.get(username="U1")
         mh1 = MainHabit.objects.get(name="AAA")
-        self.assertFalse(mh1.sendRequest(u1))
+        self.assertFalse(mh1.sendRequest(u1.id))
         self.assertFalse(ViewRequest.objects.filter(recievingUser=u1).exists())
 
     def test_cannot_send_request_to_someone_on_viewlist(self):
@@ -556,7 +559,7 @@ class HabitTestCase(TestCase):
         u2 = User.objects.get(username="U2")
         mh1 = MainHabit.objects.get(name="AAA")
         mh1.viewers.add(u2)
-        self.assertFalse(mh1.sendRequest(u2))
+        self.assertFalse(mh1.sendRequest(u2.id))
         self.assertFalse(ViewRequest.objects.filter(recievingUser=u2).exists())
 
 @tag('SubHabit')

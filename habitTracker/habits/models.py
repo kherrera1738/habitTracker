@@ -15,6 +15,8 @@ class User(AbstractUser):
         self.save()
 
     def createHabit(self, name):
+        if self.habits.filter(name=name).exists():
+            return False
         return Habit.objects.create(name=name, owner=self)
 
 class Habit(models.Model):
@@ -24,6 +26,16 @@ class Habit(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="habits")
     viewers = models.ManyToManyField(User, related_name="viewingUsers", default=None, blank=True)
     dataType = models.SmallIntegerField(default=0)
+
+    def sendRequest(self, userId):
+        if userId == self.owner.id or self.viewers.filter(id=userId).exists():
+            return False
+        recievingUser = User.objects.get(id=userId)
+        return ViewRequest.objects.create(associatedHabit=self, recievingUser=recievingUser, sendingUser=self.owner)
+
+    def removeViewer(self, userId):
+        userToRemove = User.objects.get(id=userId)
+        self.viewers.remove(userToRemove)
 
 class MainHabit(Habit):
 
@@ -102,12 +114,47 @@ class ViewRequest(models.Model):
     def __str__(self):
         return f"{self.id} | {self.associatedHabit.name} | ({self.sendingUser}) -> ({self.recievingUser})"
 
+    def reject(self):
+        self.delete()
+
+    def accept(self):
+        self.associatedHabit.viewers.add(self.recievingUser)
+        self.delete()
+
 class DataSet(models.Model):
     associatedHabit = models.OneToOneField(Habit, on_delete=models.CASCADE, related_name="dataSet")
     type = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.id} | {self.associatedHabit} | {self.type}"
+
+    def addData(self, data):
+        if self.type == 0 and isinstance(data, int):
+            return QuantitativeData.objects.create(parentSet=self, content=data)
+        elif self.type == 1 and isinstance(data, str):
+            return QualitiativeData.objects.create(parentSet=self, content=data)
+        else:
+            return False
+    
+    def updateEntry(self, entryId, data):
+        if self.type == 0 and isinstance(data, int):
+            toUpdate = QuantitativeData.objects.filter(id=entryId)
+        elif self.type == 1 and isinstance(data, str):
+            toUpdate = QualitiativeData.objects.filter(id=entryId)
+        else:
+            return False
+
+        return toUpdate.update(content=data)
+
+    def removeData(self, entryId):
+        if self.type == 0 and QuantitativeData.objects.filter(id=entryId).exists():
+            QuantitativeData.objects.get(id=entryId).delete()
+            return True
+        elif self.type == 1 and QualitiativeData.objects.filter(id=entryId).exists():
+            QualitiativeData.objects.get(id=entryId).delete()
+            return True
+        else:
+            return False
 
 class DataEntry(models.Model):
     parentSet = models.ForeignKey(DataSet, on_delete=models.CASCADE, related_name="dataEntries")
@@ -117,7 +164,7 @@ class DataEntry(models.Model):
         return f"{self.id} | {self.parentSet.associatedHabit.name}: {self.parentSet.type}| {self.date}"
 
 class QuantitativeData(DataEntry):
-    content = models.TextField()
+    content = models.DecimalField(max_digits=20, decimal_places=2)
 
 class QualitiativeData(DataEntry):
-    content = models.DecimalField(max_digits=20, decimal_places=2)
+    content = models.TextField()
