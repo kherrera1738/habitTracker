@@ -38,10 +38,51 @@ class Habit(models.Model):
         userToRemove = User.objects.get(id=userId)
         self.viewers.remove(userToRemove)
 
+    def addData(self, data):
+        return self.getDataSet().addData(data)
+
+    def getDataSetType(self):
+        types = {
+            0: QuantitativeDataSet,
+            1: QualitativeDataSet
+        }
+
+        return types[self.dataType]
+
+    def getDataSet(self):
+        return self.getDataSetType().objects.get(associatedHabit=self)
+
+    def removeData(self, id):
+        return self.getDataSet().removeData(id)
+
+    def updateEntry(self, id, data):
+        return self.getDataSet().updateEntry(id, data)
+
 class MainHabit(Habit):
 
     def __str__(self):
         return f"{self.id} | Main Habit: {self.name} | {self.owner.username}"
+
+    def createSubhabit(self, name):
+        sh = SubHabit.objects.create(name=name, owner=self.owner, dataType=self.dataType, mainHabit=self)
+        viewers = list(self.viewers.all())
+        sh.viewers.set(viewers)
+        return sh
+
+    def removeSubhabit(self, id):
+        mainDataSet = self.getDataSet()
+        subhabit = SubHabit.objects.get(id=id)
+        entires = subhabit.getDataSet().dataEntries.all()
+        entires.update(parentSet=mainDataSet)
+        subhabit.delete()
+        return True
+
+    def getData(self):
+        data = self.getDataSet().dataEntries.all()
+        subhabits = list(self.subhabits.all())
+        for subhabit in subhabits:
+            data = data | subhabit.getDataSet().dataEntries.all()
+        return data
 
 class SubHabit(Habit):
     mainHabit = models.ForeignKey(MainHabit, on_delete=models.CASCADE, related_name="subhabits")
@@ -126,11 +167,20 @@ class DataSet(models.Model):
     associatedHabit = models.OneToOneField(Habit, on_delete=models.CASCADE, related_name="dataSet")
     type = models.IntegerField(default=0)
 
-    def __str__(self):
-        return f"{self.id} | {self.associatedHabit} | {self.type}"
+    # def addData(self, data):
+    #     pass
+
+    # def updateEntry(self, entryId, data):
+    #     pass
+
+    # def removeData(self, entryId):
+    #     pass
+
 
 class QualitativeDataSet(DataSet):
-    
+    def __str__(self):
+        return f"{self.id} | {self.associatedHabit} | 0"
+
     def addData(self, data):
         if isinstance(data, str):
             return QualitativeData.objects.create(parentSet=self, content=data)
@@ -148,6 +198,8 @@ class QualitativeDataSet(DataSet):
         return False
 
 class QuantitativeDataSet(DataSet):
+    def __str__(self):
+        return f"{self.id} | {self.associatedHabit} | 1"
     
     def addData(self, data):
         if isinstance(data, Number):
@@ -167,14 +219,15 @@ class QuantitativeDataSet(DataSet):
 
 
 class DataEntry(models.Model):
-    parentSet = models.ForeignKey(DataSet, on_delete=models.CASCADE, related_name="dataEntries")
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.id} | {self.parentSet.associatedHabit.name}: {self.parentSet.type}| {self.date}"
 
 class QuantitativeData(DataEntry):
+    parentSet = models.ForeignKey(QuantitativeDataSet, on_delete=models.CASCADE, related_name="dataEntries", default=None)
     content = models.DecimalField(max_digits=20, decimal_places=2)
 
 class QualitativeData(DataEntry):
+    parentSet = models.ForeignKey(QualitativeDataSet, on_delete=models.CASCADE, related_name="dataEntries", default=None)
     content = models.TextField()

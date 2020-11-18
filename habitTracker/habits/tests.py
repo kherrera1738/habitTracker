@@ -562,7 +562,7 @@ class HabitTestCase(TestCase):
         self.assertFalse(mh1.sendRequest(u2.id))
         self.assertFalse(ViewRequest.objects.filter(recievingUser=u2).exists())
 
-@tag('SubHabit')
+@tag('SubHabit', 'rev1')
 class SubHabitTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(username="U1", email="U1@exmaple.com", password="u1password")
@@ -579,18 +579,26 @@ class SubHabitTestCase(TestCase):
         """ Attempt to add a data entry """
         sb1 = SubHabit.objects.get(name="CCC")
         for i in range(5):
-            sb1.addData(i)
-        self.assertEqual(sb1.dataSet.dataEntrie.all().count(), 5)
-        self.assertTrue(sb1.dataSet.dataEntries.filter(content=5).exists())
+            self.assertTrue(sb1.addData(i))
+        self.assertEqual(sb1.getDataSet().dataEntries.all().count(), 5)
+        self.assertTrue(sb1.getDataSet().dataEntries.filter(content=4).exists())
 
     def test_remove_data_entry(self):
         """ Attempt to remove a data entry """
         sb1 = SubHabit.objects.get(name="CCC")
         for i in range(5):
-            sb1.addData(i)
-        fifthEntryId = QuantitativeData.objects.get(content=5)
+            self.assertTrue(sb1.addData(i))
+        fifthEntryId = QuantitativeData.objects.get(content=4).id
         sb1.removeData(fifthEntryId)
-        self.assertFalse(sb1.dataSet.dataEntries.filter(id=fifthEntryId).exists())
+        self.assertFalse(sb1.getDataSet().dataEntries.filter(id=fifthEntryId).exists())
+
+    def test_update_data_entry(self):
+        """ Update an existing entry """
+        sb1 = SubHabit.objects.get(name="CCC")
+        entry = sb1.addData(1)
+        self.assertTrue(sb1.updateEntry(entry.id, 2))
+        entry.refresh_from_db()
+        self.assertEqual(entry.content, 2) 
 
 @tag('MainHabit')
 class MainHabitTestCase(TestCase):
@@ -603,7 +611,7 @@ class MainHabitTestCase(TestCase):
         """ Check that the owner value is correct """
         u1 = User.objects.get(username="U1")
         h1 = MainHabit.objects.get(name="AAA")
-        self.assertEqual(h1.owner.get(), u1)
+        self.assertEqual(h1.owner, u1)
 
     def test_create_subhabit(self):
         """ Check that subhabits can be created """
@@ -623,7 +631,7 @@ class MainHabitTestCase(TestCase):
         u2 = User.objects.get(username="U2")
         mh1.viewers.add(u2)
         sbh1 = mh1.createSubhabit("CCC")
-        self.assertTrue(sbh1.viewers.filter(username="CCC").exists())
+        self.assertTrue(sbh1.viewers.filter(username="U2").exists())
 
     def test_remove_subhabit(self):
         """ Check that a subhabit is deleted and subhabit data is added to main habit data set """
@@ -632,8 +640,10 @@ class MainHabitTestCase(TestCase):
         sb1 = SubHabit.objects.create(name="CCC", owner=u1, mainHabit=mh1)
         for i in range(5):
             sb1.addData(i)
-        mh1.remove(sb1.id)
-        self.assertEquals(mh1.dataSet.dataEntries.all().count(), 5)
+        mh1.removeSubhabit(sb1.id)
+        sb1_id = sb1.id
+        self.assertFalse(SubHabit.objects.filter(id=sb1_id).exists())
+        self.assertEquals(mh1.getDataSet().dataEntries.all().count(), 5)
 
     def test_get_subhabit_data(self):
         """ Check that subhabit data is included in all habit data """
@@ -655,6 +665,6 @@ class MainHabitTestCase(TestCase):
     def test_subhabit_gets_mainhabit_type(self):
         """ Check that adding a sub habit gives it the same datatype """
         u1 = User.objects.get(username="U1")
-        mh1 = MainHabit.objects.create(name="DDD", owner=u1, datatype=1)
+        mh1 = MainHabit.objects.create(name="DDD", owner=u1, dataType=1)
         sh1 = mh1.createSubhabit("CCC")
         self.assertEqual(sh1.dataType, 1)
