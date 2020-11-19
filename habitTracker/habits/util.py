@@ -17,9 +17,3 @@ def createDataSet(sender, instance, created, **kwargs):
             QuantitativeDataSet.objects.create(associatedHabit=instance, type=0)
         else:
             QualitativeDataSet.objects.create(associatedHabit=instance, type=1)
-
-class SubHabitError(Exception):
-    def __init__(self, expression, message):
-        self.expression = expression
-        self.message = message
-

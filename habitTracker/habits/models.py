@@ -1,6 +1,9 @@
+from datetime import date, datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from numbers import Number
+
+import pytz
 
 # Create your models here.
 class User(AbstractUser):
@@ -58,12 +61,19 @@ class Habit(models.Model):
     def updateEntry(self, id, data):
         return self.getDataSet().updateEntry(id, data)
 
+class SubHabitError(Exception):
+    def __init__(self, expression, message):
+        self.expression = expression
+        self.message = message
+
 class MainHabit(Habit):
 
     def __str__(self):
         return f"{self.id} | Main Habit: {self.name} | {self.owner.username}"
 
     def createSubhabit(self, name):
+        if self.subhabits.filter(name=name).exists():
+            raise SubHabitError(name, f"Habit with name {name} already exists")
         sh = SubHabit.objects.create(name=name, owner=self.owner, dataType=self.dataType, mainHabit=self)
         viewers = list(self.viewers.all())
         sh.viewers.set(viewers)
@@ -167,15 +177,65 @@ class DataSet(models.Model):
     associatedHabit = models.OneToOneField(Habit, on_delete=models.CASCADE, related_name="dataSet")
     type = models.IntegerField(default=0)
 
-    # def addData(self, data):
-    #     pass
+    monthDays = {
+        1: 31,
+        3: 31,
+        4: 30,
+        5: 31,
+        6: 30,
+        7: 31,
+        8: 31,
+        9: 30,
+        10: 31,
+        11: 30,
+        12: 31
+    }
 
-    # def updateEntry(self, entryId, data):
-    #     pass
+    def getByDate(self, date):
+        return self.dataEntries.filter(date__year=date.year, date__month=date.month, date__day=date.day)
 
-    # def removeData(self, entryId):
-    #     pass
+    def getByMonthAndYear(self, date):
+        return self.dataEntries.filter(date__year=date.year, date__month=date.month)
+    
+    def getByYear(self, date):
+        return self.dataEntries.filter(date__year=date.year)
 
+    def getByDateRange(self, start, end):
+        updatedStart = self.setStart(start)
+        updatedEnd = self.setEnd(end)
+        return self.dataEntries.filter(date__gte=updatedStart, date__lte=updatedEnd)
+    
+    def getByMonthAndYearRange(self, start, end):
+        return self.getByDateRange(self.setByMonthStart(start), self.setByMonthEnd(end))
+
+    def getByYearRange(self, start, end):
+        return self.getByMonthAndYearRange(self.setByYearStart(start), self.setByYearEnd(end))
+
+    def getByFiveYear(self, start): 
+        end = datetime(year=start.year+4, month=1, day=1)
+        return self.getByYearRange(self.setByYearStart(start), self.setByYearEnd(end))
+
+    def setStart(self, start):
+        return datetime(year=start.year, month=start.month, day=start.day, hour=0, minute=0, second=0, tzinfo=start.tzinfo)
+
+    def setEnd(self, end):
+        return datetime(year=end.year, month=end.month, day=end.day, hour=23, minute=59, second=59, tzinfo=end.tzinfo)
+
+    def setByMonthStart(self, start):
+        return datetime(year=start.year, month=start.month, day=1, tzinfo=start.tzinfo)
+
+    def setByMonthEnd(self, end):
+        if end.month == 2:
+            day = 29 if end.year % 4 == 0 else 28
+        else:
+            day = self.monthDays[end.month]
+        return datetime(year=end.year, month=end.month, day=day, tzinfo=end.tzinfo)
+
+    def setByYearStart(self, start):
+        return datetime(year=start.year, month=1, day=1, tzinfo=pytz.utc)
+
+    def setByYearEnd(self, end):
+        return datetime(year=end.year, month=12, day=1, tzinfo=pytz.utc)
 
 class QualitativeDataSet(DataSet):
     def __str__(self):
@@ -216,7 +276,6 @@ class QuantitativeDataSet(DataSet):
             QuantitativeData.objects.get(id=entryId).delete()
             return True
         return False
-
 
 class DataEntry(models.Model):
     date = models.DateTimeField(auto_now_add=True)

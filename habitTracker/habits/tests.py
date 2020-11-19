@@ -1,7 +1,8 @@
 from django.test import TestCase, tag
-from .models import ActivityEntry, ActivityLog, DataSet, Habit, QuantitativeData, QualitativeData, QualitativeDataSet, QuantitativeDataSet,SubHabit, User, MainHabit, ViewRequest
-from .util import SubHabitError
+from .models import ActivityEntry, ActivityLog, DataSet, Habit, QuantitativeData, QualitativeData, QualitativeDataSet, QuantitativeDataSet,SubHabit, User, MainHabit, ViewRequest, SubHabitError
+from .util import *
 from datetime import datetime
+import pytz
 
 # Create your tests here.
 @tag('User', 'rev1')
@@ -280,25 +281,31 @@ class DataSetTestCase(TestCase):
         self.assertFalse(d1.removeData(1))
         self.assertFalse(d2.removeData(1))
 
-@tag('DataSet', 'DataSetQuery')
+@tag('DataSet', 'DataSetQuery', 'rev1')
 class DataSetQueryCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(username="U1", email="U1@exmaple.com", password="u1password")
         mh1 = MainHabit.objects.create(name="AAA", owner=u1, dataType=0)
         mh2 = MainHabit.objects.create(name="BBB", owner=u1, dataType=1)
+        ds1 = mh1.getDataSet()
+        ds2 = mh2.getDataSet()
 
         for year in range(2015, 2020): # 2015,2016,2017,2018,2019 
             for month in range(1, 12, 3): # 1,4,7,10
                 for day in range(1, 12, 3): # 1,4,7,10
                     for hour in range(0, 12, 2): # 0,2,4,6,8,10
-                        date = datetime(year=year, month=month, day=day, hour=hour)
-                        mh1.dataSet.addEntry(year*1000000+month*10000+day*10+hour, createTime=date)
-                        mh2.dataSet.addEntry(str(year)+str(month)+str(day)+str(hour), createTime=date)
+                        date = datetime(year=year, month=month, day=day, hour=hour, tzinfo=pytz.utc)
+                        d1 = QuantitativeData.objects.create(parentSet=ds1, content=year*1000000+month*10000+day*10+hour)
+                        d2 = QualitativeData.objects.create(parentSet=ds2, content=str(year)+str(month)+str(day)+str(hour))
+                        d1.date = date
+                        d1.save()
+                        d2.date = date
+                        d2.save()
 
     def test_get_data_by_specific_date(self):
         """ Get data from a given date """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         year = 2015
         month = 1
@@ -318,16 +325,17 @@ class DataSetQueryCase(TestCase):
 
     def test_get_data_by_month_and_year(self):
         """ Get data from a given month """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         year = 2015
         month = 1
+        day = 1
 
-        date = datetime(year=year, month=month)
+        date = datetime(year=year, month=month, day=day)
 
-        results1 = d1.getByMonthAndYear(year, month)
-        results2 = d2.getByMonthAndYear(year, month)
+        results1 = d1.getByMonthAndYear(date)
+        results2 = d2.getByMonthAndYear(date)
 
         self.assertEqual(results1.all().count(), 24)
         self.assertEqual(results2.all().count(), 24)
@@ -335,16 +343,17 @@ class DataSetQueryCase(TestCase):
             for hour in range(0, 12, 2):
                 self.assertTrue(results1.filter(date__year=year, date__month=month, date__day=day, date__hour=hour).exists())
                 self.assertTrue(results2.filter(date__year=year, date__month=month, date__day=day, date__hour=hour).exists())
-        
 
     def test_get_data_by_year(self):
         """ Get Data from a given year """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         year = 2015
+        month = 1
+        day = 1
 
-        date = datetime(year=year)
+        date = datetime(year=year, month=month, day=day)
 
         results1 = d1.getByYear(date)
         results2 = d2.getByYear(date)
@@ -359,8 +368,8 @@ class DataSetQueryCase(TestCase):
 
     def test_get_data_from_date_range(self):
         """ Get data between two date ranges """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         yearStart = 2015
         monthStart = 1
@@ -370,8 +379,8 @@ class DataSetQueryCase(TestCase):
         monthEnd = 10
         dayEnd = 10
         
-        startDate = datetime(year=yearStart, month=monthStart, day=dayStart)
-        endDate = datetime(year=yearEnd, month=monthEnd, day=dayEnd)
+        startDate = datetime(year=yearStart, month=monthStart, day=dayStart, tzinfo=pytz.utc)
+        endDate = datetime(year=yearEnd, month=monthEnd, day=dayEnd, tzinfo=pytz.utc)
 
         results1 = d1.getByDateRange(startDate, endDate)
         results2 = d2.getByDateRange(startDate, endDate)
@@ -387,18 +396,18 @@ class DataSetQueryCase(TestCase):
     
     def test_get_data_from_month_and_year_range(self):
         """ Get data between two months and years"""
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         year = 2015
         monthStart = 1
         monthEnd = 7
         
-        startDate = datetime(year=year, month=monthStart)
-        endDate = datetime(year=year, month=monthEnd)
+        startDate = datetime(year=year, month=monthStart, day=1, tzinfo=pytz.utc)
+        endDate = datetime(year=year, month=monthEnd, day=1, tzinfo=pytz.utc)
 
-        results1 = d1.getByMonthAndYear(startDate, endDate)
-        results2 = d2.getByMonthAndYear(startDate, endDate)
+        results1 = d1.getByMonthAndYearRange(startDate, endDate)
+        results2 = d2.getByMonthAndYearRange(startDate, endDate)
 
         self.assertEqual(results1.all().count(), 72)
         self.assertEqual(results2.all().count(), 72)
@@ -410,12 +419,12 @@ class DataSetQueryCase(TestCase):
     
     def test_get_data_5_year_range(self):
         """ Get data from a 5 year range """
-        d1 = DataSet.objects.get(type=0)
-        d2 = DataSet.objects.get(type=1)
+        d1 = QuantitativeDataSet.objects.get(type=0)
+        d2 = QualitativeDataSet.objects.get(type=1)
 
         startYear = 2015
         
-        startDate = datetime(year=startYear)
+        startDate = datetime(year=startYear, month=1, day=1, tzinfo=pytz.utc)
 
         results1 = d1.getByFiveYear(startDate)
         results2 = d2.getByFiveYear(startDate)
@@ -437,7 +446,7 @@ class DataSetQueryCase(TestCase):
     #     """ Get data that occurs on a given month of the year reguardless of year """
     #     pass
 
-@tag('ViewRequest')
+@tag('ViewRequest', 'rev1')
 class ViewRequestTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(username="U1", email="U1@exmaple.com", password="u1password")
@@ -476,7 +485,7 @@ class ViewRequestTestCase(TestCase):
         self.assertFalse(ViewRequest.objects.filter(id=r1_id).exists())
 
         # Make sure that the view list is not updated
-        self.assertFalse(mh1.viewers.filter(user=u1).exists())
+        self.assertFalse(mh1.viewers.filter(id=u1.id).exists())
 
     def test_self_accepted(self):
         """ Check that request adds User to view list """
@@ -484,13 +493,13 @@ class ViewRequestTestCase(TestCase):
         mh1 = MainHabit.objects.get(name="Running") 
         r1 = ViewRequest.objects.get(associatedHabit=mh1)
         r1_id = r1.id
-        r1.reject()
+        r1.accept()
 
         # Make sure request was removed
         self.assertFalse(ViewRequest.objects.filter(id=r1_id).exists())
 
         # Make sure that the view list is updated
-        self.assertTrue(mh1.viewers.filter(user=u2).exists())
+        self.assertTrue(mh1.viewers.filter(id=u2.id).exists())
 
 @tag('Habit', 'rev1')
 class HabitTestCase(TestCase):
@@ -600,7 +609,7 @@ class SubHabitTestCase(TestCase):
         entry.refresh_from_db()
         self.assertEqual(entry.content, 2) 
 
-@tag('MainHabit')
+@tag('MainHabit', 'rev1')
 class MainHabitTestCase(TestCase):
     def setUp(self):
         u1 = User.objects.create(username="U1", email="U1@exmaple.com", password="u1password")
