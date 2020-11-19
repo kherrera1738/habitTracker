@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from numbers import Number
@@ -94,11 +94,81 @@ class MainHabit(Habit):
             data = data | subhabit.getDataSet().dataEntries.all()
         return data
 
+    def getByDate(self, date, onlyMain=True):
+        entires = self.getDataSet().getByDate(date)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByDate(date)
+        return entires
+
+    def getByMonthAndYear(self, date, onlyMain=True):
+        entires = self.getDataSet().getByMonthAndYear(date)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByMonthAndYear(date)
+        return entires
+    
+    def getByYear(self, date, onlyMain=True):
+        entires = self.getDataSet().getByYear(date)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByYear(date)
+        return entires
+
+    def getByDateRange(self, start, end, onlyMain=True):
+        entires = self.getDataSet().getByDateRange(start, end)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByDateRange(start, end)
+        return entires
+    
+    def getByMonthAndYearRange(self, start, end, onlyMain=True):
+        entires = self.getDataSet().getByMonthAndYearRange(start, end)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByMonthAndYearRange(start, end)
+        return entires
+
+    def getByYearRange(self, start, end, onlyMain=True):
+        entires = self.getDataSet().getByYearRange(start, end)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByYearRange(start, end)
+        return entires
+
+    def getByFiveYear(self, start, onlyMain=True): 
+        entires = self.getDataSet().getByFiveYear(start)
+        if not onlyMain:
+            for subhabit in list(self.subhabits.all()):
+                entires = entires | subhabit.getDataSet().getByFiveYear(start)
+        return entires
+
 class SubHabit(Habit):
     mainHabit = models.ForeignKey(MainHabit, on_delete=models.CASCADE, related_name="subhabits")
 
     def __str__(self):
         return f"{self.id} | Sub Habit: {self.name}->{self.mainHabit.name} | {self.owner.username}"
+
+    def getByDate(self, date):
+        return self.getDataSet().getByDate(date)
+
+    def getByMonthAndYear(self, date):
+        return self.getDataSet().getByMonthAndYear(date)
+    
+    def getByYear(self, date):
+        return self.getDataSet().getByYear(date)
+
+    def getByDateRange(self, start, end):
+        return self.getDataSet().getByDateRange(start, end)
+    
+    def getByMonthAndYearRange(self, start, end):
+        return self.getDataSet().getByMonthAndYearRange(start, end)
+
+    def getByYearRange(self, start, end):
+        return self.getDataSet().getByYearRange(start, end)
+
+    def getByFiveYear(self, start): 
+        return self.getDataSet().getByFiveYear(start)
 
 class ActivityLog(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="activityLog")
