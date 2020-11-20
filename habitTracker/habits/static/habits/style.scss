@@ -1,14 +1,18 @@
-$primary-color: #99dac4;
-$secondary-color: beige;
+$primary-color: #3ac093;
+$primary-hover: #2f9271;
+$secondary-color: #ffffe3;
 $third-color: #f8f8f8;
 
 .logo-div {
-    background-color: $primary-color;
-    // font-family: 'Farro';
+    font-family: 'Lobster';
 }
 
 .main-nav {
-    background-color: $secondary-color;
+    background-color: $primary-color;
+}
+
+.nav-link {
+    color: white;
 }
 
 .active {
@@ -17,7 +21,25 @@ $third-color: #f8f8f8;
 
 .nav-link:hover {
     color: black;
-    text-decoration: underline;
+    // text-decoration: underline;
+}
+
+.bform {
+    background-color: white;
+    border-width: 3px !important;    
+    width: 500px;
+    margin: auto;
+    margin-top: 50px;
+}
+
+.btn-login {
+    background-color: $primary-color;
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: $primary-hover;
+    color: white;
 }
 
 body {

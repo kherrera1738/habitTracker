@@ -176,7 +176,7 @@ class ActivityLog(models.Model):
     notificationCount = models.IntegerField(default=0) 
 
     def __str__(self):
-        return f"{self.id} | {self.owner.name}: {self.notificationCount}"
+        return f"{self.id} | {self.owner.username}: {self.notificationCount}"
 
     def addEntry(self, content):
         if(self.notificationCount >= self.limit):

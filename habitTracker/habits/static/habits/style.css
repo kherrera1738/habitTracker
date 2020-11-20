@@ -1,9 +1,13 @@
 .logo-div {
-  background-color: #99dac4;
+  font-family: "Lobster";
 }
 
 .main-nav {
-  background-color: beige;
+  background-color: #3ac093;
+}
+
+.nav-link {
+  color: white;
 }
 
 .active {
@@ -12,7 +16,24 @@
 
 .nav-link:hover {
   color: black;
-  text-decoration: underline;
+}
+
+.bform {
+  background-color: white;
+  border-width: 3px !important;
+  width: 500px;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.btn-login {
+  background-color: #3ac093;
+  color: white;
+}
+
+.btn-login:hover {
+  background-color: #2f9271;
+  color: white;
 }
 
 body {
