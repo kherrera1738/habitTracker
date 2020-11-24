@@ -1,4 +1,26 @@
 {% extends "habits/layout.html" %}
 
+{% block title %}
+    Profile
+{% endblock %}
+
 {% block body %}
+    {% with habits=user.habits.all %}
+        {% if habits %}
+            {% for habit in habits%}
+                <div class="row justify-content-center">
+                    <div class="border px-4 py-3 mb-3 rounded bform col-12">
+                        <h3>{{ habit.name }}</h3>
+                        <a href="{% url 'viewhabit' habit.id %}">view</a> 
+                        <br>
+                        <a href="#">delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h4>Looks like you don't have any habits yet!</h4>
+            <p>Why don't you try making some?</p>
+        {% endif %}
+    {% endwith %}
+    <a href="{% url 'createHabit' %}"><button class="btn btn-login">Create New Habit</button></a>
 {% endblock %}

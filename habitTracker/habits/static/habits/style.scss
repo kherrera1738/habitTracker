@@ -12,24 +12,20 @@ $third-color: #f8f8f8;
 }
 
 .nav-link {
-    color: white;
+    color: white !important;
 }
 
-.active {
-    color: black;
-}
+// .active {
+//     color: black;
+// }
 
 .nav-link:hover {
-    color: black;
-    // text-decoration: underline;
+    color: black !important;
 }
 
 .bform {
     background-color: white;
     border-width: 3px !important;    
-    width: 500px;
-    margin: auto;
-    margin-top: 50px;
 }
 
 .btn-login {
@@ -40,6 +36,10 @@ $third-color: #f8f8f8;
 .btn-login:hover {
     background-color: $primary-hover;
     color: white;
+}
+
+#nav-button {
+    border-color: black;
 }
 
 body {

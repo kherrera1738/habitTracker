@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, MainHabit, SubHabit, ActivityLog, ActivityEntry, ViewRequest, DataSet, QualitativeData, QuantitativeData
+from .models import User, MainHabit, SubHabit, ActivityLog, ActivityEntry, ViewRequest, DataSet, QualitativeData, QuantitativeData, QualitativeDataSet, QuantitativeDataSet
 
 # Register your models here.
 admin.site.register(User)
@@ -11,3 +11,5 @@ admin.site.register(ViewRequest)
 admin.site.register(DataSet)
 admin.site.register(QualitativeData)
 admin.site.register(QuantitativeData)
+admin.site.register(QualitativeDataSet)
+admin.site.register(QuantitativeDataSet)

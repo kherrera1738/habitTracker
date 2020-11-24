@@ -8,7 +8,5 @@ class UserUITestCase(TestCase):
     def setUp(self):
         user = User.objects.create(username="u1", email="u1@example.com", password="password1")
         user.save()
-
-    def test_login(self):
-        pass
+        
     

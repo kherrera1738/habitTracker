@@ -7,23 +7,16 @@
 }
 
 .nav-link {
-  color: white;
-}
-
-.active {
-  color: black;
+  color: white !important;
 }
 
 .nav-link:hover {
-  color: black;
+  color: black !important;
 }
 
 .bform {
   background-color: white;
   border-width: 3px !important;
-  width: 500px;
-  margin: auto;
-  margin-top: 50px;
 }
 
 .btn-login {
@@ -34,6 +27,10 @@
 .btn-login:hover {
   background-color: #2f9271;
   color: white;
+}
+
+#nav-button {
+  border-color: black;
 }
 
 body {
