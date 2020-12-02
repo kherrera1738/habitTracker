@@ -12,7 +12,6 @@ def createActivityLog(sender, instance, created, **kwargs):
 @receiver(post_save, sender=SubHabit)
 def createDataSet(sender, instance, created, **kwargs):
     """ Create data set for each habit """
-    print("dataset being created")
     if created:
         if instance.dataType == 0:
             if not QuantitativeDataSet.objects.filter(associatedHabit=instance).exists():

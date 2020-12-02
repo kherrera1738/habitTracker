@@ -1,0 +1,16 @@
+{% extends "habits/formContainer.html" %}
+
+{% block title %}
+    Create SubHabit
+{% endblock %}
+
+{% block formBody %}
+    <form action="{% url 'createSubHabit' mainhabit.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>{{ form.name.label }}</label>
+            {{ form.name }}
+        </div>
+        <input class="btn btn-login my-2" type="submit">
+    </form>
+{% endblock %}

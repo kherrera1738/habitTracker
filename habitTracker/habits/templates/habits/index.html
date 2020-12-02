@@ -5,15 +5,17 @@
 {% endblock %}
 
 {% block body %}
-    {% with habits=user.habits.all %}
+    {% with habits=habitSet.all %}
         {% if habits %}
             {% for habit in habits%}
                 <div class="row justify-content-center">
                     <div class="border px-4 py-3 mb-3 rounded bform col-12">
                         <h3>{{ habit.name }}</h3>
-                        <a href="{% url 'viewhabit' habit.id %}">view</a> 
+                        <a href="{% url 'viewHabit' habit.id %}">view</a> 
                         <br>
-                        <a href="#">delete</a>
+                        <a href="{% url 'deleteHabit' habit.id %}">delete</a>
+                        <br>
+                        <a href="{% url 'editHabit' habit.id %}">edit</a>
                     </div>
                 </div>
             {% endfor %}

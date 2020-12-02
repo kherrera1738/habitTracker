@@ -1,6 +1,6 @@
 from django.test import TestCase, tag
 from .models import ActivityEntry, ActivityLog, DataSet, Habit, QuantitativeData, QualitativeData, QualitativeDataSet, QuantitativeDataSet,SubHabit, User, MainHabit, ViewRequest, SubHabitError
-from .util import *
+from .signals import *
 from datetime import datetime
 import pytz
 

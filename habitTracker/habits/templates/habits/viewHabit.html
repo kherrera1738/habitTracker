@@ -1,0 +1,80 @@
+{% extends "habits/layout.html" %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="border px-4 py-3 mb-3 rounded bform col-12">
+            <h3>{{ habit.name }}</h3>
+            <hr>
+            <a href="{% url 'deleteHabit' habit.id %}">delete</a>
+            <br>
+            <a href="{% url 'editHabit' habit.id %}">edit</a>
+            {% with subhabits=habit.subhabits.all %}
+                <h4>Subhabits</h4>
+                {% if subhabits %}
+                    <div class="list-group">
+                        {% for subhabit in subhabits %}
+                            <a href="{% url 'viewSubHabit' subhabit.id %}" class="list-group-item list-group-item-action">{{ subhabit.name }}</a>
+                        {% endfor %}
+                    </div> 
+                {% else %}
+                    <p>No Subhabits!</p>
+                {% endif %}
+                <a href="{% url 'createSubHabit' habit.id %}"><button class="btn btn-login my-3">Create New Sub Habit</button></a>
+            {% endwith %}
+            {% with datapoints=allData.all %}
+                {% if datapoints %}
+                    <table class="table table-hover table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">Value</th>
+                                <th scope="col">Habit</th>
+                                <th scope="col">Date</th>
+                            </tr>
+                        </thead>
+                        {% for point in datapoints %}
+                            <tr>
+                                <th scope="row">{{ point.content }}</th>
+                                <td>{{ point.parentSet.associatedHabit.name }}</td>
+                                <td>{{ point.date|date:"SHORT_DATE_FORMAT" }} {{ point.date|time:"H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'editEntry' point.parentSet.associatedHabit_id point.id %}">edit</a>
+                                    <a href="{% url 'deleteEntry' point.parentSet.associatedHabit_id point.id %}">delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <h4>No data yet!</h4>
+                    <p>Try to make some</p>
+                {% endif%}
+                <a href="{% url 'addHabitData' habit.id %}"><button class="btn btn-login">Add Data</button></a>
+            {% endwith %}
+            <div class="accordion md-accordion mt-3" id="accordionEx" role="tablist" aria-multiselectable="true">
+
+                <div class="card">
+              
+                  <div class="card-header" role="tab" id="headingOne1">
+                    <a data-toggle="collapse" data-parent="#accordionEx" href="#collapseOne1" aria-expanded="true"
+                      aria-controls="collapseOne1" id="add-viewer">
+                      <h5 class="mb-0">
+                        Add Viewer
+                      </h5>
+                    </a>
+                  </div>
+              
+                  <div id="collapseOne1" class="collapse" role="tabpanel" aria-labelledby="headingOne1"
+                    data-parent="#accordionEx">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="user">Enter Username to add</label>
+                            <input type="email" name="to" class="form-control" id="username-in" placeholder="UserName">
+                        </div>
+                        <input class="btn btn-login my-2" id="add-viewer-btn" data-habit="{{ habit.id }}" type="submit">
+                    </div>
+                  </div>
+              
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

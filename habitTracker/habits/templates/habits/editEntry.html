@@ -1,0 +1,19 @@
+{% extends "habits/formContainer.html" %}
+
+{% block title %}
+    Edit Data
+{% endblock %}
+
+{% block formBody %}
+    <h4>{{ habit.name }}</h4>
+    <p>Value: {{ entry.content }}</p>
+    <p>Date: {{ entry.date|date:"SHORT_DATE_FORMAT" }} {{ entry.date|time:"H:i" }}</p>
+    <form action="{% url 'editEntry' habit.id entry.id%}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>{{ form.content.label }}</label>
+            {{ form.content }}
+        </div>
+        <input class="btn btn-login my-2" type="submit">
+    </form>
+{% endblock %}

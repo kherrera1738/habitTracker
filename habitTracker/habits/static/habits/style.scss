@@ -42,6 +42,15 @@ $third-color: #f8f8f8;
     border-color: black;
 }
 
+#add-viewer {
+    color: black;
+}
+
+#add-viewer:hover {
+    color: black;
+    text-decoration: none;
+}
+
 body {
     background-color: $third-color;
 }

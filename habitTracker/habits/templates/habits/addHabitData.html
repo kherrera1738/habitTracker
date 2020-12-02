@@ -1,0 +1,16 @@
+{% extends "habits/formContainer.html" %}
+
+{% block title %}
+    Add Data
+{% endblock %}
+
+{% block formBody %}
+    <form action="{% url 'addHabitData' habit.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>{{ form.content.label }}</label>
+            {{ form.content }}
+        </div>
+        <input class="btn btn-login my-2" type="submit">
+    </form>
+{% endblock %}

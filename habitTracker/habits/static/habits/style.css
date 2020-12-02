@@ -33,6 +33,15 @@
   border-color: black;
 }
 
+#add-viewer {
+  color: black;
+}
+
+#add-viewer:hover {
+  color: black;
+  text-decoration: none;
+}
+
 body {
   background-color: #f8f8f8;
 }

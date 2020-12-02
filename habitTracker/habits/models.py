@@ -35,6 +35,9 @@ class Habit(models.Model):
         if userId == self.owner.id or self.viewers.filter(id=userId).exists():
             return False
         recievingUser = User.objects.get(id=userId)
+        
+        if recievingUser.recievedRequests.filter(associatedHabit=self).exists():
+            return False
         return ViewRequest.objects.create(associatedHabit=self, recievingUser=recievingUser, sendingUser=self.owner)
 
     def removeViewer(self, userId):
@@ -42,6 +45,11 @@ class Habit(models.Model):
         self.viewers.remove(userToRemove)
 
     def addData(self, data):
+        if(isinstance(data, str)):
+            try:
+                data = int(data)
+            except SyntaxError:
+                return False
         return self.getDataSet().addData(data)
 
     def getDataSetType(self):
@@ -148,6 +156,9 @@ class SubHabit(Habit):
 
     def __str__(self):
         return f"{self.id} | Sub Habit: {self.name}->{self.mainHabit.name} | {self.owner.username}"
+
+    def getData(self):
+        return self.getDataSet().dataEntries
 
     def getByDate(self, date):
         return self.getDataSet().getByDate(date)
@@ -337,9 +348,16 @@ class QuantitativeDataSet(DataSet):
         return False
 
     def updateEntry(self, entryId, data):
+        if(isinstance(data, str)):
+            try:
+                data = int(data)
+            except SyntaxError:
+                return False
+        
         if isinstance(data, Number):
            return QuantitativeData.objects.filter(id=entryId).update(content=data)
-        return 
+        
+        return False 
     
     def removeData(self, entryId):
         if QuantitativeData.objects.filter(id=entryId).exists():
