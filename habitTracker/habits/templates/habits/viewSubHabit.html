@@ -5,9 +5,11 @@
         <div class="border px-4 py-3 mb-3 rounded bform col-12">
             <h3>{{ habit.name }}</h3>
             <hr>
-            <a href="{% url 'deleteSubHabit' habit.id %}">delete</a>
-            <br>
-            <a href="{% url 'editSubHabit' habit.id %}">edit</a>
+            {% if user == habit.owner %}
+                <a href="{% url 'deleteSubHabit' habit.id %}">delete</a>
+                <br>
+                <a href="{% url 'editSubHabit' habit.id %}">edit</a>
+            {% endif %}
             <h4>MainHabit</h4>
             <div class="list-group mb-3">
                 <a href="{% url 'viewHabit' habit.mainHabit_id %}" class="list-group-item list-group-item-action">{{ habit.mainHabit.name }}</a>
@@ -38,32 +40,36 @@
                     <h4>No data yet!</h4>
                     <p>Try to make some</p>
                 {% endif%}
-                <a href="{% url 'addSubHabitData' habit.id%}"><button class="btn btn-login">Add Data</button></a>
+                {% if user == habit.owner %}
+                    <a href="{% url 'addSubHabitData' habit.id%}"><button class="btn btn-login">Add Data</button></a>
+                {% endif %}
             {% endwith %}
-            <div class="accordion md-accordion mt-3" id="accordionEx" role="tablist" aria-multiselectable="true">
-                <div class="card">
-                  <div class="card-header" role="tab" id="headingOne1">
-                    <a data-toggle="collapse" data-parent="#accordionEx" href="#collapseOne1" aria-expanded="true"
-                      aria-controls="collapseOne1" id="add-viewer">
-                      <h5 class="mb-0">
-                        Add Viewer
-                      </h5>
-                    </a>
-                  </div>
-              
-                  <div id="collapseOne1" class="collapse" role="tabpanel" aria-labelledby="headingOne1"
-                    data-parent="#accordionEx">
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="user">Enter Username to add</label>
-                            <input type="email" name="to" class="form-control" id="username-in" placeholder="UserName">
+            {% if user == habit.owner %}
+                <div class="accordion md-accordion mt-3" id="accordionEx" role="tablist" aria-multiselectable="true">
+                    <div class="card">
+                        <div class="card-header" role="tab" id="headingOne1">
+                            <a data-toggle="collapse" data-parent="#accordionEx" href="#collapseOne1" aria-expanded="true"
+                            aria-controls="collapseOne1" id="add-viewer">
+                            <h5 class="mb-0">
+                                Add Viewer
+                            </h5>
+                            </a>
                         </div>
-                        <input class="btn btn-login my-2" id="add-viewer-btn" data-habit="{{ habit.id }}" type="submit">
+                    
+                        <div id="collapseOne1" class="collapse" role="tabpanel" aria-labelledby="headingOne1"
+                            data-parent="#accordionEx">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="user">Enter Username to add</label>
+                                    <input type="email" name="to" class="form-control" id="username-in" placeholder="UserName">
+                                </div>
+                                <input class="btn btn-login my-2" id="add-viewer-btn" data-habit="{{ habit.id }}" type="submit">
+                            </div>
+                        </div>
+                
                     </div>
-                  </div>
-              
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

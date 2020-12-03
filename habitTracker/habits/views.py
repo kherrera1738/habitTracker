@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from .models import Habit, MainHabit, User, SubHabit
+from .models import Habit, MainHabit, User, SubHabit, ViewRequest
 
 class CreateHabitForm(forms.Form):
     typeChoices = (
@@ -36,7 +36,7 @@ class EditHabitForm(forms.Form):
 def index(request):
     if request.user.is_authenticated:
         return render(request, "habits/index.html", {
-        'habitSet': MainHabit.objects.filter(owner=request.user)
+        'habitSet': MainHabit.objects.filter(owner=request.user) 
     })
     return HttpResponseRedirect(reverse("login"))
 
@@ -326,6 +326,15 @@ def sendRequest(request):
     
         if User.objects.filter(username=data.get("to")).exists() and \
             Habit.objects.filter(id=habitId).exists():
+
+            if(SubHabit.objects.filter(id=habitId).exists()):
+                sb = SubHabit.objects.get(id=habitId)
+                
+                if(ViewRequest.objects.filter(associatedHabit=sb.mainHabit).exists()):
+                    reply["success"] = False
+                    reply["message"] = "MainHabit already has sent request"  
+                    return JsonResponse(reply)                                  
+
             to = User.objects.get(username=data.get("to"))
             habit = Habit.objects.get(id=habitId)
             if not habit.sendRequest(to.id):
@@ -343,4 +352,43 @@ def getRequestCount(request):
     reply = {
         "count" : request.user.recievedRequests.count()
     }
+
     return JsonResponse(reply)
+
+@csrf_exempt
+@login_required
+def getViewRequests(request):
+    viewRequests = request.user.recievedRequests.order_by("-id").all()
+    return JsonResponse([viewRequest.serialize() for viewRequest in viewRequests], safe=False)
+
+@csrf_exempt
+@login_required
+def replyRequest(request):
+    reply = {}
+    if request.method == "POST":
+        data = json.loads(request.body)
+        dataNeeded = {"requestId", "reply"}
+        if data.keys() >= dataNeeded and ViewRequest.objects.filter(id=data.get("requestId")).exists():
+            viewRequest = ViewRequest.objects.get(id=data.get("requestId"))
+            if data.get("reply") == "Accept":
+                reply["success"] = True
+                reply["message"] = "Request was accepted"
+                viewRequest.accept()
+            elif data.get("reply") == "Reject":
+                viewRequest.reject()
+                reply["success"] = True
+                reply["message"] = "Request was rejected"
+            else:
+                reply["success"] = False
+                reply["message"] = "Could not accept or reject request"
+            return JsonResponse(reply)
+    reply["success"] = False
+    reply["message"] = "Request may not exist"
+    return JsonResponse(reply)
+
+@login_required
+def viewOthersHabit(request, habit_id):
+    if MainHabit.objects.filter(id=habit_id).exists():
+        return HttpResponseRedirect(reverse("viewHabit", args=[habit_id]))
+    else:
+        return HttpResponseRedirect(reverse("viewSubHabit", args=[habit_id]))

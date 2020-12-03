@@ -28,7 +28,7 @@ class Habit(models.Model):
 
     name = models.CharField(max_length=60)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="habits")
-    viewers = models.ManyToManyField(User, related_name="viewingUsers", default=None, blank=True)
+    viewers = models.ManyToManyField(User, related_name="viewing", default=None, blank=True)
     dataType = models.SmallIntegerField(default=0)
 
     def sendRequest(self, userId):
@@ -253,6 +253,13 @@ class ViewRequest(models.Model):
     def accept(self):
         self.associatedHabit.viewers.add(self.recievingUser)
         self.delete()
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "sender": self.sendingUser.username,
+            "habit": self.associatedHabit.name
+        }
 
 class DataSet(models.Model):
     associatedHabit = models.OneToOneField(Habit, on_delete=models.CASCADE, related_name="dataSet")
