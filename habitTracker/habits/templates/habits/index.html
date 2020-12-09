@@ -26,11 +26,13 @@
     {% endwith %}
     {% with viewing=user.viewing.all %}
         {% if viewing %}
+            <h2>Viewing Habits</h2>
+            <hr>
             {% for view in viewing%}
                 <div class="row justify-content-center">
                     <div class="border px-4 py-3 mb-3 rounded bform col-12">
                         <h3>{{ view.name }}</h3>
-                        <p>{{ view.owner.username }}</p>
+                        <p>User: {{ view.owner.username }}</p>
                         <a href="{% url 'viewOthersHabit' view.id %}">view</a>
                     </div>
                 </div>

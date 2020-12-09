@@ -20,6 +20,7 @@ urlpatterns = [
     path("habit/<int:habit_id>/<int:entry_id>/delete", views.deleteEntry, name="deleteEntry"),
     path("sendRequest", views.sendRequest, name="sendRequest"),
     path("getRequestsCount", views.getRequestCount, name="getRequestCount"),
+    path("getHabitData", views.getHabitData, name="getHabitData"),
     path("getViewRequests", views.getViewRequests, name="getViewRequests"),
     path("replyRequest", views.replyRequest, name="replyRequest"),
     path("viewOthersHabit/<int:habit_id>", views.viewOthersHabit, name="viewOthersHabit")

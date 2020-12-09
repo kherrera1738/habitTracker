@@ -47,7 +47,7 @@ class Habit(models.Model):
     def addData(self, data):
         if(isinstance(data, str)):
             try:
-                data = int(data)
+                data = float(data)
             except SyntaxError:
                 return False
         return self.getDataSet().addData(data)
@@ -102,49 +102,49 @@ class MainHabit(Habit):
             data = data | subhabit.getDataSet().dataEntries.all()
         return data
 
-    def getByDate(self, date, onlyMain=True):
+    def getByDate(self, date, onlyMain=False):
         entires = self.getDataSet().getByDate(date)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
                 entires = entires | subhabit.getDataSet().getByDate(date)
         return entires
 
-    def getByMonthAndYear(self, date, onlyMain=True):
+    def getByMonthAndYear(self, date, onlyMain=False):
         entires = self.getDataSet().getByMonthAndYear(date)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
                 entires = entires | subhabit.getDataSet().getByMonthAndYear(date)
         return entires
     
-    def getByYear(self, date, onlyMain=True):
+    def getByYear(self, date, onlyMain=False):
         entires = self.getDataSet().getByYear(date)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
                 entires = entires | subhabit.getDataSet().getByYear(date)
         return entires
 
-    def getByDateRange(self, start, end, onlyMain=True):
+    def getByDateRange(self, start, end, onlyMain=False):
         entires = self.getDataSet().getByDateRange(start, end)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
                 entires = entires | subhabit.getDataSet().getByDateRange(start, end)
         return entires
     
-    def getByMonthAndYearRange(self, start, end, onlyMain=True):
+    def getByMonthAndYearRange(self, start, end, onlyMain=False):
         entires = self.getDataSet().getByMonthAndYearRange(start, end)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
                 entires = entires | subhabit.getDataSet().getByMonthAndYearRange(start, end)
         return entires
 
-    def getByYearRange(self, start, end, onlyMain=True):
+    def getByYearRange(self, start, end, onlyMain=False):
         entires = self.getDataSet().getByYearRange(start, end)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
                 entires = entires | subhabit.getDataSet().getByYearRange(start, end)
         return entires
 
-    def getByFiveYear(self, start, onlyMain=True): 
+    def getByFiveYear(self, start, onlyMain=False): 
         entires = self.getDataSet().getByFiveYear(start)
         if not onlyMain:
             for subhabit in list(self.subhabits.all()):
@@ -357,7 +357,7 @@ class QuantitativeDataSet(DataSet):
     def updateEntry(self, entryId, data):
         if(isinstance(data, str)):
             try:
-                data = int(data)
+                data = float(data)
             except SyntaxError:
                 return False
         
@@ -382,6 +382,18 @@ class QuantitativeData(DataEntry):
     parentSet = models.ForeignKey(QuantitativeDataSet, on_delete=models.CASCADE, related_name="dataEntries", default=None)
     content = models.DecimalField(max_digits=20, decimal_places=2)
 
+    def serialize(self):
+        return {
+            "content": self.content,
+            "date": self.date
+        }
+
 class QualitativeData(DataEntry):
     parentSet = models.ForeignKey(QualitativeDataSet, on_delete=models.CASCADE, related_name="dataEntries", default=None)
     content = models.TextField()
+
+    def serialize(self):
+        return {
+            "content": self.content,
+            "date": self.date
+        }

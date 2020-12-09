@@ -1,14 +1,18 @@
 import json
+import pytz
+from datetime import datetime, timedelta, tzinfo
+
 from django import forms
 from django.core.checks import messages
-from django.db.models.expressions import F
-from django.http.response import JsonResponse
-from django.shortcuts import render
-from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models.expressions import F
+from django.db import IntegrityError
+from django.http.response import JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import Habit, MainHabit, User, SubHabit, ViewRequest
 
@@ -392,3 +396,29 @@ def viewOthersHabit(request, habit_id):
         return HttpResponseRedirect(reverse("viewHabit", args=[habit_id]))
     else:
         return HttpResponseRedirect(reverse("viewSubHabit", args=[habit_id]))
+
+@csrf_exempt
+@login_required
+def getHabitData(request):
+    reply = {
+        "success": False
+    }
+
+    data = json.loads(request.body)
+    if MainHabit.objects.filter(id=data["id"]).exists():
+        habit = MainHabit.objects.get(id=data["id"])
+    else:
+        habit = SubHabit.objects.get(id=data["id"])
+
+    if data["getBy"] == "thisWeek":
+        today = timezone.now().date()
+        sunday = today - timedelta(days=(today.isocalendar()[2]))
+        saturday = sunday + timedelta(days=6)
+
+        sunday = datetime.combine(sunday, datetime.min.time(), tzinfo=pytz.utc)
+        saturday = datetime.combine(saturday, datetime.max.time(), tzinfo=pytz.utc)
+        reply["success"] = True
+        reply["data"] = [datapoint.serialize() for datapoint in habit.getByDateRange(sunday, saturday).order_by('-id').all()]
+        return JsonResponse(reply, safe=False)
+
+    return JsonResponse(reply)
