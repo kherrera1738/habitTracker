@@ -1,0 +1,34 @@
+{% extends "habits/layout.html" %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="border px-4 py-3 mb-3 rounded bform col-12">
+            <h2>About</h2>
+            <hr>
+            <p>This site can be used to track what ever type of data that you want and See your progress as time goes on. 
+                The inspiration for this page comes from me constantly asking the questions "How often does this happen?" 
+                or "how much better have I gotten at X".</p>
+            <p>On this page you will find a general run down on how the site works</p>
+            
+            <h3>What are Habits and Subhabits?</h3>
+            <p>Habits are meant to represent the main categories for the items that an individual would want to track. 
+                These are meant to be more broad if there are smaller subcategories that will also be tracked. Subhabits 
+                are these smaller categories. A habit can have any number of subhabits all with unique names but two subhabits 
+                cannot share the same name.</p>
+            
+            <h3>What are the types of logs?</h3>
+            <p>Currently there are logs for numeric and written data. Numeric logs handle data that involes recording numbers 
+                and are saved in decimal form. Written logs are more so keep track of notes.</p>
+            <p>There will be support for more types of data form and record keeping in the future with more customizable data logs.</p>
+
+            <h3>Can I share data with someone else?</h3>
+            <p>Yes! If you have their username then you can use the 'Add Viewer' form at the bottom of a habit or subhabit to share it. 
+                If you add them to a subhabit then they will be able to view only the data in the subhabit but if they are added to a habit 
+                then they will be able to view both habit and all associated subhabit data.</p>
+
+            <h3>How can we contact you?</h3>
+            <p>If you run into any bugs or are having problems with the app, then feel free to send me an email at kevyneherrera@gmail.com. 
+                I am also open to hearing suggestions on how to imporve the site.</p>
+        </div>
+    </div>
+{% endblock %}

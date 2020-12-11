@@ -5,11 +5,12 @@
         <div class="border px-4 py-3 mb-3 rounded bform col-12">
             <h3>{{ habit.name }}</h3>
             <hr>
-            {% if user == habit.owner %}
-                <a href="{% url 'deleteHabit' habit.id %}">delete</a>
-                <br>
-                <a href="{% url 'editHabit' habit.id %}">edit</a>
-            {% endif %}
+            <div class="d-flex flex-row-reverse">
+                {% if user == habit.owner %}
+                    <a href="{% url 'editHabit' habit.id %}"><button class="btn btn-secondary">edit</button></a>
+                    <a href="{% url 'deleteHabit' habit.id %}"><button class="btn btn-danger">delete</button></a>
+                {% endif %}
+            </div>
             {% with subhabits=habit.subhabits.all %}
                 <h4>Subhabits</h4>
                 {% if subhabits %}
@@ -141,7 +142,6 @@
                                 <input class="btn btn-login my-2" id="add-viewer-btn" data-habit="{{ habit.id }}" type="submit">
                             </div>
                         </div>
-                
                     </div>
                 </div>
             {% endif %}

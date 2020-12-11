@@ -5,11 +5,12 @@
         <div class="border px-4 py-3 mb-3 rounded bform col-12">
             <h3>{{ habit.name }}</h3>
             <hr>
-            {% if user == habit.owner %}
-                <a href="{% url 'deleteSubHabit' habit.id %}">delete</a>
-                <br>
-                <a href="{% url 'editSubHabit' habit.id %}">edit</a>
-            {% endif %}
+            <div class="d-flex flex-row-reverse">
+                {% if user == habit.owner %}
+                    <a href="{% url 'editSubHabit' habit.id %}"><button class="btn btn-secondary">edit</button></a>
+                    <a href="{% url 'deleteSubHabit' habit.id %}"><button class="btn btn-danger">delete</button></a>
+                {% endif %}
+            </div>
             <h4>MainHabit</h4>
             <div class="list-group mb-3">
                 <a href="{% url 'viewHabit' habit.mainHabit_id %}" class="list-group-item list-group-item-action">{{ habit.mainHabit.name }}</a>

@@ -92,6 +92,9 @@ def logoutView(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
+def about(request):
+    return render(request, "habits/about.html")
+
 @login_required
 def createHabit(request):   
     if request.method == "POST":
@@ -155,8 +158,17 @@ def addHabitData(request, habit_id):
 @login_required
 def deleteHabit(request, habit_id):
     habit = MainHabit.objects.get(id=habit_id)
-    habit.delete()
-    return HttpResponseRedirect(reverse("index")) 
+    if request.method == "POST":
+        if "yes" in request.POST:
+            habit.delete()
+            return HttpResponseRedirect(reverse("index"), {
+                'message': "Habit Succesfully deleted"
+            })
+        else:
+            return HttpResponseRedirect(reverse("index"))
+    return render(request, "habits/deleteHabit.html", {
+        "habit": habit
+    })
 
 @login_required
 def editHabit(request, habit_id):
@@ -240,8 +252,17 @@ def addSubHabitData(request, subhabit_id):
 def deleteSubHabit(request, subhabit_id):
     habit = SubHabit.objects.get(id=subhabit_id)
     mainHabitId = habit.mainHabit_id
-    habit.delete()
-    return HttpResponseRedirect(reverse("viewHabit", args=[mainHabitId]))
+    if request.method == "POST":
+        if "yes" in request.POST:
+            habit.delete()
+            return HttpResponseRedirect(reverse("viewHabit", args=[mainHabitId]), {
+                'message': "Habit Succesfully deleted"
+            })
+        else:
+            return HttpResponseRedirect(reverse("viewHabit", args=[mainHabitId]))
+    return render(request, "habits/deleteSubHabit.html", {
+        "habit": habit
+    })
 
 @login_required
 def editSubHabit(request, subhabit_id):

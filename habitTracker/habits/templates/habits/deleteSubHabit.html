@@ -1,0 +1,17 @@
+{% extends "habits/layout.html" %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="border px-4 py-3 mb-3 rounded bform col-12">
+            <h3>Delete "{{ habit.name }}"</h3>
+            <hr>
+            <p>Are you sure you want to delete {{ habit.name }}?</p>
+            <p class="font-weight-light">Note that this is irreversible and will result in the loss of all of your data.</p>
+            <form action="{% url 'deleteSubHabit' habit.id %}" method="POST">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit" name="yes">Yes</button>
+                <button class="btn btn-secondary" type="submit" >No</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
