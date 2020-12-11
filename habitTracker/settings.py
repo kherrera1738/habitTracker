@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = '@1jw%3u%=c(e!+lu+tuniv%0vtlv=&#%xm7t60*e%=+5z*l6l&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.89", "127.0.0.1"]
+ALLOWED_HOSTS = ["192.168.1.89", "127.0.0.1", "0.0.0.0"]
 
 
 # Application definition
@@ -70,8 +71,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'habitTracker.wsgi.application'
+MIDDLEWARE_CLASSES = ('whitenoise.middleware.WhiteNoiseMiddleware')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+WSGI_APPLICATION = 'habitTracker.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -120,4 +123,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATIC_ROOT = '0.0.0.0:5000/static/'
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
