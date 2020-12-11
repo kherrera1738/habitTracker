@@ -1,3 +1,5 @@
+var app = {};
+
 document.addEventListener("DOMContentLoaded", function(){
     var addViewerBtn = document.querySelector('#add-viewer-btn');
     if(addViewerBtn !== null ) {
@@ -12,49 +14,22 @@ document.addEventListener("DOMContentLoaded", function(){
     var radios = document.getElementsByName('dataQuery');
     if(radios !== null) { 
         for(var i = 0; i < radios.length; i++) {
-            radios[i].addEventListener('click', function() {
-                var dateSel = this.value,
-                monthForm = document.querySelector('#monthYearEntries'),
-                dateForm = document.querySelector('#dayEntries'),
-                rangeBox = document.querySelector('#rangeBox');
-
-                if(dateSel === "year" || dateSel === "month") {
-                    monthForm.style.display = 'block';
-                    dateForm.style.display = 'none';
-                    rangeBox.style.display = 'inline';
-                } else if (dateSel === "day") {
-                    dateForm.style.display = 'block';
-                    monthForm.style.display = 'none';
-                    rangeBox.style.display = 'inline';
-                } else {
-                    dateForm.style.display = 'none';
-                    monthForm.style.display = 'none';
-                    rangeBox.style.display = 'none';
-                }
-            });
+            radios[i].addEventListener('click', setupRadio, false);
         }
     }
 
     var rangeType = document.querySelector('#rangeType');
     if(rangeType !== null) {
-        rangeType.addEventListener('click', function() {
-            var ends = document.getElementsByClassName('end');
-            if(this.value === "single") {
-                console.log(this.value);
-                for(var i = 0; i < ends.length; i++){
-                    ends[i].style.display = 'none';
-                }
-            } else {
-                console.log(this.value);
-                for(var i = 0; i < ends.length; i++){
-                    ends[i].style.display = 'inline';
-                }
-            }
-        });
+        rangeType.addEventListener('click', setupTypeBox, false);
     }
 
-    var chart = document.getElementById('myChart'),
-    config = {
+    var queryButton = document.getElementById('query-btn');
+    if(queryButton !== null) {
+        queryButton.addEventListener('click', query, false);
+    }
+
+    var chart = document.getElementById('myChart');
+    app.config = {
         type: 'line',
         data: {
             datasets:   [
@@ -86,9 +61,9 @@ document.addEventListener("DOMContentLoaded", function(){
                 }]
             }
         }
-    }
+    };
 
-    getWeekData(chart, config);
+    getWeekData(chart, app.config);
     loadRequestCount();
 });
 
@@ -261,35 +236,151 @@ function getWeekData(chart, config) {
         })
         .then(response => response.json())
         .then(result => {
-            var data = config.data.datasets[0].data,
-            length = result.data.length;
-
-            if(length > 0) {
-                data.push({
-                    t: moment(result.data[length-1].date),
-                    y: parseFloat(result.data[length-1].content)
-                });
-                for(var i = length - 2, j = 0; i >= 0; i--) {
-                    var date = moment(result.data[i].date);
-                    if(data[j].t.day() !== date.day()) {
-                        data.push({
-                            t: date,
-                            y: parseFloat(result.data[i].content)
-                        });
-                        j += 1;
-                    } else {
-                        var content = parseFloat(result.data[i].content); 
-                        data[j].y = content > data[j].y ? content : data[j].y;
-                    }
-                }
-            }
-
-            // console.log(data.length);
+            maxPerDayData(result.data, config.data.datasets[0].data);
             console.log(config);
 
             var ctx = chart.getContext('2d');
             chart.style.display = "block";
-            var myChart = new Chart(ctx, config);
+            app.chartObj = new Chart(ctx, config);
         });
     }
+}
+
+function setupRadio() {
+    var dateSel = this.value,
+    monthForm = document.querySelector('#monthYearEntries'),
+    dateForm = document.querySelector('#dayEntries'),
+    rangeBox = document.querySelector('#rangeBox');
+
+    monthForm.style.display = dateSel === "year" || dateSel === "month" ? 'block' : 'none';
+    dateForm.style.display = dateSel === "day" ?  'block' : 'none';
+    rangeBox.style.display = monthForm.style.display === 'block' || dateForm.style.display === 'block' ? 'inline' : 'none';
+}
+
+function setupTypeBox() {
+    var ends = document.getElementsByClassName('end'),
+    displayType = this.value === "single" ? 'none' : 'inline'; 
+    for(var i = 0; i < ends.length; i++){
+        ends[i].style.display = displayType;
+    }
+}
+
+function maxPerDayData(inputArray, outputArray) {
+    var length = inputArray.length;
+
+    if(length > 0) {
+        outputArray.push({
+            t: moment(inputArray[length-1].date),
+            y: parseFloat(inputArray[length-1].content)
+        });
+        for(var i = length - 2, j = 0; i >= 0; i--) {
+            var curr_entry = inputArray[i],
+            date = moment(curr_entry.date);
+            if(outputArray[j].t.day() !== date.day()) {
+                outputArray.push({
+                    t: date,
+                    y: parseFloat(curr_entry.content)
+                });
+                j += 1;
+            } else {
+                var content = parseFloat(curr_entry.content); 
+                outputArray[j].y = content > outputArray[j].y ? content : outputArray[j].y;
+            }
+        }
+    }
+}
+
+function query() {
+    var queryMessage = document.querySelector('#queryMessage'),
+    body = { 
+        id: habitId
+    };
+    queryMessage.style.display = 'none';
+
+    if(makeQueryBody(body)) {
+        makeQuery(body);
+    } else {
+        queryMessage.style.display = 'inline';
+        queryMessage.innerText = 'Something went wrong. Make sure end is not before start and dates are filled';
+    }
+}
+
+function makeQueryBody(body) {
+    var valid = true;
+    body.getBy = getRadioBtnValue();
+
+    if(body.getBy !== 'thisWeek') {
+        valid = addInput(body);
+        fixMonthYearDay(body);
+    }
+
+    return valid;
+}
+
+function getRadioBtnValue() {
+    var radioBtns = document.getElementsByName('dataQuery');
+    for(var i = 0; i < radioBtns.length; i++) {
+        if(radioBtns[i].checked) {
+            return radioBtns[i].value;
+        }
+    }
+}
+
+function fixMonthYearDay(body) {
+    if(body.getBy === 'month' || body.getBy === 'year') {
+        body.start = body.start + '-01';
+        if(body.hasOwnProperty('end')) {
+            body.end = body.end + '-01';
+        }
+    }
+}
+
+function addEndInput(body, formGroup) {
+    formInputs = formGroup.querySelector('.end'),
+    endInput = formInputs.querySelector('input');
+
+    if(endInput.value === '') {
+        return false;
+    } else {
+        body.end = endInput.value;
+    }
+
+    if(body.end < body.start) {
+        return false;
+    }
+    return true;
+}
+
+function addInput(body) {
+    var group = body.getBy === 'day' ? 'dayEntries' : 'monthYearEntries',
+    rangeBox = document.getElementById('rangeType'),
+    formGroup = document.getElementById(group),
+    formInputs = formGroup.querySelector('.start'),
+    startInput = formInputs.querySelector('input');
+    if(startInput.value === '') {
+        return false;
+    } else {
+        body.range = rangeBox.value;
+        body.start = startInput.value;
+
+        if(body.range === 'range') {
+            return addEndInput(body, formGroup);
+        }
+    }
+    return true;
+}
+
+function makeQuery(body) {
+    fetch('/getHabitData', {
+        method: "POST",
+        body: JSON.stringify(body)
+    })
+    .then(response => response.json())
+    .then(result => {
+        app.config.data.datasets[0].data = [];
+
+        maxPerDayData(result.data, app.config.data.datasets[0].data);
+
+        app.chartObj.update();
+    });
 }

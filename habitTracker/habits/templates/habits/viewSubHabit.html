@@ -14,6 +14,64 @@
             <div class="list-group mb-3">
                 <a href="{% url 'viewHabit' habit.mainHabit_id %}" class="list-group-item list-group-item-action">{{ habit.mainHabit.name }}</a>
             </div>
+            {% if habit.dataType == 0 %}
+                <h5>Data Query</h5>
+                <div id="queryMessage" style="display: none; color: red;"></div>
+                <div class="form-row">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="dataQuery" id="yearLabel" value="year">
+                        <label class="form-check-label" for="yearLabel">Year</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="dataQuery" id="monthLabel" value="month">
+                        <label class="form-check-label" for="monthLabel">Month</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="dataQuery" id="dayLabel" value="day">
+                        <label class="form-check-label" for="dayLabel">Day</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" checked name="dataQuery" id="thisWeekLabel" value="thisWeek">
+                        <label class="form-check-label" for="thisWeekLabel">This Week</label>
+                    </div>
+                    <div style="display: none;" id="rangeBox">
+                        <select class="form-control" id="rangeType">
+                            <option selected value="single">Single</option>
+                            <option value="range">Range</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="dayEntries" style="display: none;">
+                    <div class="form-group start">
+                        <label for="dateStart" class="col-2 col-form-label">Start</label>
+                        <div class="col-10">
+                            <input class="form-control" type="date" id="dateInputStart">
+                        </div>
+                    </div>
+                    <div class="form-group end" style="display: none;">
+                        <label for="dateEnd" class="col-2 col-form-label">End</label>
+                        <div class="col-10">
+                            <input class="form-control" type="date" id="dateInputEnd">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row" id="monthYearEntries" style="display: none;">
+                    <div class="form-group start">
+                        <label for="monthYearStart" class="col-2 col-form-label">Start</label>
+                        <div class="col-10">
+                            <input class="form-control" type="month" id="monthInputStart">
+                        </div>
+                    </div>
+                    <div class="form-group end" style="display: none;">
+                        <label for="monthYearEnd" class="col-2 col-form-label">End</label>
+                        <div class="col-10">
+                            <input class="form-control" type="month" id="monthInputEnd">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-login my-3" id="query-btn">Search</button>
+                <canvas id="myChart" style="display: none;" data-id="{{ habit.id }}"></canvas>
+            {% endif %}
             {% with datapoints=allData.all %}
                 {% if datapoints %}
                     <table class="table table-hover table-dark">

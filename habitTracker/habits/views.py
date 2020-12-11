@@ -1,6 +1,6 @@
 import json
 import pytz
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta, date
 
 from django import forms
 from django.core.checks import messages
@@ -419,6 +419,31 @@ def getHabitData(request):
         saturday = datetime.combine(saturday, datetime.max.time(), tzinfo=pytz.utc)
         reply["success"] = True
         reply["data"] = [datapoint.serialize() for datapoint in habit.getByDateRange(sunday, saturday).order_by('-id').all()]
-        return JsonResponse(reply, safe=False)
+    else:
+        # start = datetime.combine(date.fromisoformat(data["start"]), datetime.min.time(), tzinfo=pytz.utc)
+        start = datetime.strptime(data['start'], '%Y-%m-%d')
+        start = start.replace(tzinfo=pytz.utc)
 
-    return JsonResponse(reply)
+        end = None
+        if data["range"] == "range":
+            end = datetime.strptime(data['end'], '%Y-%m-%d')
+            end = end.replace(tzinfo=pytz.utc)
+        
+        if data["getBy"] == "day":
+            if data["range"] == "range":
+                reply["data"] = [datapoint.serialize() for datapoint in habit.getByDateRange(start, end).order_by('-id').all()]
+            else:
+                reply["data"] = reply["data"] = [datapoint.serialize() for datapoint in habit.getByDate(start).order_by('-id').all()]
+        elif data["getBy"] == "month":
+            if data["range"] == "range":
+                reply["data"] = [datapoint.serialize() for datapoint in habit.getByMonthAndYearRange(start, end).order_by('-id').all()]
+            else:
+                reply["data"] = reply["data"] = [datapoint.serialize() for datapoint in habit.getByMonthAndYear(start).order_by('-id').all()]
+        else:
+            if data["range"] == "range":
+                reply["data"] = [datapoint.serialize() for datapoint in habit.getByYearRange(start, end).order_by('-id').all()]
+            else:
+                reply["data"] = reply["data"] = [datapoint.serialize() for datapoint in habit.getByYear(start).order_by('-id').all()]
+        reply["success"] = True
+
+    return JsonResponse(reply, safe=False)
