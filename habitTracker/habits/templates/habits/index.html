@@ -11,11 +11,8 @@
                 <div class="row justify-content-center">
                     <div class="border px-4 py-3 mb-3 rounded bform col-12">
                         <h3>{{ habit.name }}</h3>
-                        <a href="{% url 'viewHabit' habit.id %}">view</a> 
-                        <br>
-                        <a href="{% url 'deleteHabit' habit.id %}">delete</a>
-                        <br>
-                        <a href="{% url 'editHabit' habit.id %}">edit</a>
+                        <a href="{% url 'viewHabit' habit.id %}"><button class="btn btn-login">view</button></a> 
+                        <a href="{% url 'editHabit' habit.id %}"><button class="btn btn-login">edit</button></a>
                     </div>
                 </div>
             {% endfor %}
