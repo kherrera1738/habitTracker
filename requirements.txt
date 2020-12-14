@@ -102,4 +102,3 @@ Werkzeug==0.14.1
 whitenoise==5.2.0
 widgetsnbextension==3.4.1
 wrapt==1.12.1
-zope.interface==4.3.2
