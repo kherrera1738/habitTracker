@@ -12,7 +12,6 @@ cryptography==2.1.4
 cycler==0.10.0
 daemonize==2.4.7
 decorator==4.3.0
-distro-info===0.18ubuntu0.18.04.1
 Django==3.1.1
 entrypoints==0.2.3
 flake8==2.5.4
