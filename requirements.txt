@@ -82,7 +82,6 @@ qtconsole==4.4.1
 reportlab==3.4.0
 requests==2.18.4
 requests-unixsocket==0.1.5
-screen-resolution-extra==0.0.0
 SecretStorage==2.3.1
 Send2Trash==1.5.0
 setproctitle==1.1.10
