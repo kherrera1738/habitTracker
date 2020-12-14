@@ -1,0 +1,103 @@
+$primary-color: #3ac093;
+$primary-hover: #2f9271;
+$secondary-color: #ffffe3;
+$third-color: #f8f8f8;
+
+.logo-div {
+    font-family: 'Lobster';
+}
+
+.main-nav {
+    background-color: $primary-color;
+}
+
+.nav-link {
+    color: white !important;
+}
+
+// .active {
+//     color: black;
+// }
+
+.nav-link:hover {
+    color: black !important;
+}
+
+.bform {
+    background-color: white;
+    border-width: 3px !important;    
+}
+
+.btn-login {
+    background-color: $primary-color;
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: $primary-hover;
+    color: white;
+}
+
+.dropdown-item:hover {
+    color: #16181b;
+    text-decoration: none;
+    background-color: #f8f9fa;
+}
+
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+}
+
+.hidable {
+    animation-name: hide;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-play-state: paused;
+}
+
+#nav-button {
+    border-color: black;
+}
+
+#add-viewer {
+    color: black;
+}
+
+#add-viewer:hover {
+    color: black;
+    text-decoration: none;
+}
+
+body {
+    background-color: $third-color;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes hide {
+    0% {
+        opacity: 1;
+        height: 100%;
+        line-height: 100%;
+    }
+    50% {
+        opacity: 0;
+        height: 25%;
+        line-height: 25%;
+    }
+    100% {
+        opacity: 0;
+        height: 0px;
+        line-height: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+}
