@@ -124,21 +124,3 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_URL = '/static/'
 
-# AWS_ACCESS_KEY_ID = "AKIATYIMID7YU5NSRH5M"
-# AWS_SECRET_ACCESS_KEY = "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"
-# AWS_STORAGE_BUCKET_NAME = "hbttracker"
-
-# AWS_S3_FILE_OVERWRITE = False
-# AWS_DEFAULT_ACL = None
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'static'),
-# )
-# AWS_FILE_EXPIRE = 200
-# AWS_PRELOAD_METADATA = True
-# AWS_QUERYSTRING_AUTH = True
-
-# DEFAULT_FILE_STORAGE = 'habitTracker.utils.MediaRootS3BotoStorage'
-# STATICFILES_STORAGE = 'habitTracker.utils.StaticRootS3BotoStorage'
